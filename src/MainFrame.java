@@ -27,8 +27,10 @@ public class MainFrame extends JFrame {
 
     private JMenuBar menuBar = new JMenuBar();
     private JMenu fileMenu = new JMenu("File");
+    private JMenu sampleMenu = new JMenu("Sample");
     private JMenuItem openFileMenuItem = new JMenuItem("Open");
     private JMenuItem exitMenuItem = new JMenuItem("Exit");
+    private JMenuItem removeAnomalMenuItem = new JMenuItem("Remove Anomal");
 
     private JTabbedPane tabs = new JTabbedPane();
 
@@ -40,6 +42,7 @@ public class MainFrame extends JFrame {
     private JTable autocorelationTable;
     private AbstractTableModel autocorelationTableModel;
     private XYSeriesCollection autocorelationGraphDataset;
+    private JLabel stationaryByAutocorelation = new JLabel("Stationary = "); 
 
     private JTextArea trendTextArea = new JTextArea();
 
@@ -76,19 +79,20 @@ public class MainFrame extends JFrame {
                 if (openFileChooser.showOpenDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
                     String fileName = openFileChooser.getSelectedFile().getAbsolutePath();
                     sample = new Sample(fileName);
-                    sampleTable.tableChanged(null);
-                    autocorelationTable.tableChanged(null);
-                    medianSmoothTable.tableChanged(null);
-                    lsSmoothTable.tableChanged(null);
-                    s31Table.tableChanged(null);
-                    s42Table.tableChanged(null);
-                    refreshSampleGraphDataset();
-                    refreshAutocorelationDataset();
-                    refreshMedianSmoothDataset();
-                    refreshLsSmoothDataset();
-                    refreshS31Dataset();
-                    refreshTrendTextArea();
-                    refreshS42Dataset();
+                    updateData();
+//                    sampleTable.tableChanged(null);
+//                    autocorelationTable.tableChanged(null);
+//                    medianSmoothTable.tableChanged(null);
+//                    lsSmoothTable.tableChanged(null);
+//                    s31Table.tableChanged(null);
+//                    s42Table.tableChanged(null);
+//                    refreshSampleGraphDataset();
+//                    refreshAutocorelationDataset();
+//                    refreshMedianSmoothDataset();
+//                    refreshLsSmoothDataset();
+//                    refreshS31Dataset();
+//                    refreshTrendTextArea();
+//                    refreshS42Dataset();
                 }
             }
 
@@ -105,7 +109,18 @@ public class MainFrame extends JFrame {
         });
 
         fileMenu.add(exitMenuItem);
+
+        removeAnomalMenuItem.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sample.removeAnomal();
+                updateData();
+            }
+        });
+        sampleMenu.add(removeAnomalMenuItem);
+
         menuBar.add(fileMenu);
+        menuBar.add(sampleMenu);
 
         setJMenuBar(menuBar);
 
@@ -260,9 +275,10 @@ public class MainFrame extends JFrame {
         autocorelationChartPanel.setHorizontalAxisTrace(true);
         autocorelationChartPanel.setDoubleBuffered(true);
 
-        JPanel autocorelationPanel = new JPanel(new TableLayout(new double[][] {{TableLayout.FILL},{0.50,0.50}}));
+        JPanel autocorelationPanel = new JPanel(new TableLayout(new double[][] {{TableLayout.FILL},{0.50,20,0.50}}));
         autocorelationPanel.add(new JScrollPane(autocorelationTable),"0, 0");
-        autocorelationPanel.add(autocorelationChartPanel, "0, 1");
+        autocorelationPanel.add(stationaryByAutocorelation, "0, 1");
+        autocorelationPanel.add(autocorelationChartPanel, "0, 2");
         tabs.add("Autocorelation",autocorelationPanel);
 
         tabs.add("Trend",new JScrollPane(trendTextArea));
@@ -542,8 +558,9 @@ public class MainFrame extends JFrame {
         autocorelationGraphDataset.removeAllSeries();
 
         XYSeries series = new XYSeries("autocorelation");
+        series.add(0,1);
         for(int i=0; i<sample.getAutocorelationCoficients().length; i++) {
-            series.add(i,sample.getAutocorelationCoficients()[i][0]);
+            series.add(i+1,sample.getAutocorelationCoficients()[i][0]);
         }
         autocorelationGraphDataset.addSeries(series);
     }
@@ -581,7 +598,6 @@ public class MainFrame extends JFrame {
         s42GraphDataset.addSeries(s42);
     }
 
-
     public void refreshTrendTextArea() {
         trendTextArea.setText("");
         boolean isHasTrend = sample.isHaveTrend();
@@ -594,5 +610,26 @@ public class MainFrame extends JFrame {
         trendTextArea.append("Has trend:"+String.valueOf(isHasTrend));
     }
 
+    public void updateData () {
+        sample.calcAutocorelationSimilarity();
+        sample.smoothByMedian();
+        sample.smoothByLS();
+        sample.calcS31();
+        sample.calcS42();
 
+        sampleTable.tableChanged(null);
+        autocorelationTable.tableChanged(null);
+        stationaryByAutocorelation.setText("Stationary = "+sample.isStationaryByAutocorelation());
+        medianSmoothTable.tableChanged(null);
+        lsSmoothTable.tableChanged(null);
+        s31Table.tableChanged(null);
+        s42Table.tableChanged(null);
+        refreshSampleGraphDataset();
+        refreshAutocorelationDataset();
+        refreshMedianSmoothDataset();
+        refreshLsSmoothDataset();
+        refreshS31Dataset();
+        refreshTrendTextArea();
+        refreshS42Dataset();
+    }
 }

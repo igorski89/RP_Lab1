@@ -19,7 +19,11 @@ public class Sample {
 
     protected ArrayList<Double> sample = new ArrayList<Double>();
     public ArrayList<Double> getSample() { return sample; }
-    public double get(int i) { return sample.get(i); }
+    public double get(int i) {
+        i = Math.abs(i);
+        i = i % size();
+        return sample.get(i);
+    }
     protected void set(int i, double v) { sample.set(i, v); }
     public int size() { return sample.size(); }
 
@@ -29,12 +33,13 @@ public class Sample {
     public Sample(String filename) {
         this.loadFromFile(filename);
 
-        removeAnomal();
-        calcAutocorelationSimilarity();
-        smoothByMedian();
-        smoothByLS();
-        calcS31();
-        calcS42();
+//        removeAnomal();
+//
+//        calcAutocorelationSimilarity();
+//        smoothByMedian();
+//        smoothByLS();
+//        calcS31();
+//        calcS42();
     }
 
     protected void loadFromFile(String filename) {
@@ -232,7 +237,7 @@ public class Sample {
         int N = this.size() + 2;
         Point2D[] M = new Point2D[N];
         Point2D[] M1 = new Point2D[N];
-
+            
         for (int i=0; i<N; i++) {
             if (i == 0 || i == N - 1) {
                 M[i] = new Point2D.Double();
@@ -366,14 +371,14 @@ public class Sample {
     public ArrayList<Point2D> getS31() { return s31; }
     public void calcS31() {
         s31.clear();
-        double x = 3;
+        double x = 0;
         double dx = 0.1;
         final int N = this.size();
         double h  = 1;
-        s31.add(new Point2D.Double(0,get(0)));
-        s31.add(new Point2D.Double(1,get(1)));
-        s31.add(new Point2D.Double(2,get(2)));
-        while(x <= N-4){
+//        s31.add(new Point2D.Double(0,get(0)));
+//        s31.add(new Point2D.Double(1,get(1)));
+//        s31.add(new Point2D.Double(2,get(2)));
+        while(x <= N-1){
 //            int ind = (int)Math.round(x);
             int ind = (int)x;
 
@@ -397,23 +402,23 @@ public class Sample {
 
             x += dx;
         }
-        s31.add(new Point2D.Double(N-3,get(N-3)));
-        s31.add(new Point2D.Double(N-2,get(N-2)));
-        s31.add(new Point2D.Double(N-1,get(N-1)));
+//        s31.add(new Point2D.Double(N-3,get(N-3)));
+//        s31.add(new Point2D.Double(N-2,get(N-2)));
+//        s31.add(new Point2D.Double(N-1,get(N-1)));
     }
 
     protected ArrayList<Point2D> s42 = new ArrayList<Point2D>();
     public ArrayList<Point2D> getS42() { return s42; }
     public void calcS42() {
         s42.clear();
-        double x = 4;
+        double x = 0;
         double dx = 0.1;
         final int N = this.size();
         double h  = 1;
-        s42.add(new Point2D.Double(0,get(0)));
-        s42.add(new Point2D.Double(1,get(1)));
-        s42.add(new Point2D.Double(2,get(2)));
-        while(x <= N-5){
+//        s42.add(new Point2D.Double(0,get(0)));
+//        s42.add(new Point2D.Double(1,get(1)));
+//        s42.add(new Point2D.Double(2,get(2)));
+        while(x <= N-1){
             int ind = (int)Math.round(x);
 
             double y = 2.0 * (x - ind * h) / h;
@@ -442,8 +447,8 @@ public class Sample {
 
             x += dx;
         }
-        s42.add(new Point2D.Double(N-3,get(N-3)));
-        s42.add(new Point2D.Double(N-2,get(N-2)));
-        s42.add(new Point2D.Double(N-1,get(N-1)));
+//        s42.add(new Point2D.Double(N-3,get(N-3)));
+//        s42.add(new Point2D.Double(N-2,get(N-2)));
+//        s42.add(new Point2D.Double(N-1,get(N-1)));
     }
 }
